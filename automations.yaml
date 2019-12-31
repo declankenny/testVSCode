@@ -1,0 +1,94 @@
+- id: '1575756194407'
+  alias: Holiday Lights On
+  description: Turn on the outside lights an hour before sunset or at 6:30 AM
+  trigger:
+  - event: sunset
+    offset: -00:15:00
+    platform: sun
+  - at: 06:30:00
+    platform: time
+  condition: []
+  action:
+  - data:
+      entity_id: switch.holiday_light
+    service: switch.turn_on
+- id: '1575756620788'
+  alias: Holiday Lights Off
+  description: Turn off the holiday lights at 10:45 pm and 8:00 AM
+  trigger:
+  - at: '22:45:00'
+    platform: time
+  - at: 07:45:00
+    platform: time
+  condition: []
+  action:
+  - data:
+      entity_id: switch.holiday_light
+    service: switch.turn_off
+- id: '1575835030770'
+  alias: Workday Morning Lights
+  description: ''
+  trigger:
+  - at: 05:30:00
+    platform: time
+  condition:
+  - condition: state
+    entity_id: binary_sensor.work_today
+    state: 'on'
+  action:
+  - data:
+      brightness: 254
+      color_temp: 366
+      entity_id: light.counter
+    service: light.turn_on
+  - data:
+      brightness: 255
+      entity_id: light.master_bed_ceiling
+      transition: 600
+    service: light.turn_on
+  - data:
+      brightness: 254
+      color_temp: 366
+      entity_id: light.living_table_lamp
+    service: light.turn_on
+- id: '1575858089285'
+  alias: Enable Night Mode
+  description: shut it down
+  trigger:
+  - at: '23:00:00'
+    platform: time
+  condition:
+  - condition: state
+    entity_id: binary_sensor.night_mode
+    state: 'off'
+  action:
+  - data:
+      entity_id: script.night_mode
+    service: script.turn_on
+- id: '1575858179596'
+  alias: Reset Night Mode
+  description: ''
+  trigger:
+  - at: 06:00:00
+    platform: time
+  condition: []
+  action:
+  - data:
+      payload: 'off'
+      qos: '0'
+      retain: true
+      topic: ha/sensor/night_mode
+    service: mqtt.publish
+- id: '1575862140318'
+  alias: Turn off the Christmas Tree
+  description: ''
+  trigger:
+  - entity_id: binary_sensor.night_mode
+    from: 'off'
+    platform: state
+    to: 'on'
+  condition: []
+  action:
+  - data:
+      entity_id: switch.living_room_outlet_switch
+    service: switch.turn_off

@@ -1,0 +1,110 @@
+automation: !include automations.yaml
+binary_sensor:
+  - platform: mqtt
+    name: "School Today"
+    state_topic: "ha/sensor/calendar/today/school"
+    payload_on: "on"
+    payload_off: "off"
+    qos: 0
+  - platform: mqtt
+    name: "School Tomorrow"
+    state_topic: "ha/sensor/calendar/tomorrow/school"
+    payload_on: "on"
+    payload_off: "off"
+    qos: 0
+  - platform: mqtt
+    name: "Night Mode"
+    state_topic: "ha/sensor/night_mode"
+    payload_on: "on"
+    payload_off: "off"
+    qos: 0
+  - platform: workday
+    country: US
+    name: work_today
+  - platform: workday
+    country: US
+    name: work_tomorrow
+    days_offset: 1
+#discovery:
+default_config:
+group: !include groups.yaml
+homeassistant:
+  auth_providers:
+    - type: homeassistant
+    - type: trusted_networks
+      trusted_networks:
+      - 192.168.0.0/24
+      - 172.19.0.0/24
+  customize: !include customize.yaml
+http:
+  base_url: house.declankenny.com
+  server_port: 8123
+  ip_ban_enabled: True
+  login_attempts_threshold: 3
+#hue:
+  #bridges:
+    #- host: 192.168.0.22
+      #allow_unreachable: true
+      #allow_hue_groups: false
+light:
+  - platform: switch
+    name: Master Bedroom Fan Light
+    entity_id: switch.master_bedroom_fan_light
+  - platform: group
+    name: Counter
+    entities:
+    - light.island1
+    - light.island2
+  - platform: group
+    name: "Off at Night"
+    entities:
+    - light.island1
+    - light.island2
+    - light.breakfast
+    - light.dining
+    - light.living_room_ceiling
+    - light.living_room_fan
+    - light.ash_ceiling
+    - light.teagan_ceiling
+  - platform: group
+    name: "Dim at Night"
+    entities:
+    - light.living_table_lamp
+lovelace:
+  #mode: yaml
+nest:
+  client_id: !secret nest_id
+  client_secret: !secret nest_secret
+notify:
+  - platform: slack
+    name: slack
+    default_channel: '#homeautomation'
+    api_key: !secret slack_api
+  - platform: pushbullet
+    name: pushbullet_declan
+    api_key: !secret pushbullet_api
+recorder:
+  db_url: !secret sql_conn
+  exclude:
+    domains:
+      - updater
+      - weather
+      - group
+      - persistent_notification
+      - zone
+      - sun
+      - zwave
+      - media_player
+    entities:
+      - binary_sensor.school_today
+      - binary_sensor.school_tomorrow
+
+script: !include scripts.yaml
+scene: !include scenes.yaml
+tts:
+  - platform: google_translate
+weather:
+  - platform: darksky
+    api_key: !secret dark_sky_api_key
+zwave:
+  device_config: !include zwave_device_config.yaml
